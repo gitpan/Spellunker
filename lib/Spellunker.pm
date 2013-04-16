@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.3");
+use version; our $VERSION = version->declare("v0.0.4");
 
 use Spellunker::WordList::Perl;
 use File::Spec ();
@@ -36,6 +36,7 @@ sub _load_user_dict {
     return unless -d $home;
     my $dictpath = File::Spec->catfile($home, '.spellunker.en');
     if (-f $dictpath) {
+        $self->load_dictionary($dictpath);
     }
 }
 
@@ -132,6 +133,7 @@ sub _clean_text {
     $text =~ s/\s+/ /gs;
     $text =~ s/[()\@,;:"\/.]+/ /gs;     # Remove punctuation
     $text =~ s/you'll/you will/gs;
+    $text =~ s/\bisn't\b/is not/gs;
 
     return $text;
 }
