@@ -1,0 +1,93 @@
+{
+   "abstract" : "Pure perl spelling checker implementation",
+   "author" : [
+      "tokuhirom <tokuhirom@gmail.com>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Minilla/v0.0.53",
+   "license" : "perl_5",
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Spellunker",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "inc",
+         "share",
+         "eg",
+         "examples",
+         "author"
+      ]
+   },
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "CPAN::Meta" : "0",
+            "CPAN::Meta::Prereqs" : "0",
+            "Module::Build" : "0.38"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Pod::Wordlist::hanekomu" : "0",
+            "Test::CPAN::Meta" : "0",
+            "Test::MinimumVersion" : "0.10108",
+            "Test::Pod" : "1.41",
+            "Test::Spelling" : "0"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "File::ShareDir" : "0",
+            "Pod::Simple" : "0",
+            "Regexp::Common" : "0",
+            "perl" : "5.008001"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test::More" : "0.98"
+         }
+      }
+   },
+   "provides" : {
+      "Spellunker" : {
+         "file" : "lib/Spellunker.pm",
+         "version" : "v0.0.1"
+      },
+      "Spellunker::CLI" : {
+         "file" : "lib/Spellunker/CLI.pm"
+      },
+      "Spellunker::CLI::Pod" : {
+         "file" : "lib/Spellunker/CLI/Pod.pm",
+         "version" : "v0.0.1"
+      },
+      "Spellunker::Pod" : {
+         "file" : "lib/Spellunker/Pod.pm"
+      },
+      "Spellunker::Pod::Parser" : {
+         "file" : "lib/Spellunker/Pod/Parser.pm"
+      },
+      "Spellunker::WordList::Perl" : {
+         "file" : "lib/Spellunker/WordList/Perl.pm"
+      },
+      "Test::Spellunker" : {
+         "file" : "lib/Test/Spellunker.pm"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/tokuhirom/Spellunker/issues"
+      },
+      "homepage" : "https://github.com/tokuhirom/Spellunker",
+      "repository" : {
+         "url" : "git://github.com/tokuhirom/Spellunker.git",
+         "web" : "https://github.com/tokuhirom/Spellunker"
+      }
+   },
+   "version" : "v0.0.1"
+}

@@ -1,0 +1,53 @@
+---
+abstract: 'Pure perl spelling checker implementation'
+author:
+  - 'tokuhirom <tokuhirom@gmail.com>'
+build_requires:
+  Test::More: 0.98
+configure_requires:
+  CPAN::Meta: 0
+  CPAN::Meta::Prereqs: 0
+  Module::Build: 0.38
+dynamic_config: 0
+generated_by: 'Minilla/v0.0.53, CPAN::Meta::Converter version 2.130880'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Spellunker
+no_index:
+  directory:
+    - t
+    - xt
+    - inc
+    - share
+    - eg
+    - examples
+    - author
+provides:
+  Spellunker:
+    file: lib/Spellunker.pm
+    version: v0.0.1
+  Spellunker::CLI:
+    file: lib/Spellunker/CLI.pm
+  Spellunker::CLI::Pod:
+    file: lib/Spellunker/CLI/Pod.pm
+    version: v0.0.1
+  Spellunker::Pod:
+    file: lib/Spellunker/Pod.pm
+  Spellunker::Pod::Parser:
+    file: lib/Spellunker/Pod/Parser.pm
+  Spellunker::WordList::Perl:
+    file: lib/Spellunker/WordList/Perl.pm
+  Test::Spellunker:
+    file: lib/Test/Spellunker.pm
+requires:
+  File::ShareDir: 0
+  Pod::Simple: 0
+  Regexp::Common: 0
+  perl: 5.008001
+resources:
+  bugtracker: https://github.com/tokuhirom/Spellunker/issues
+  homepage: https://github.com/tokuhirom/Spellunker
+  repository: git://github.com/tokuhirom/Spellunker.git
+version: v0.0.1
