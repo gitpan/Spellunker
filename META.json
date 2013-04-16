@@ -36,7 +36,7 @@
             "Test::CPAN::Meta" : "0",
             "Test::MinimumVersion" : "0.10108",
             "Test::Pod" : "1.41",
-            "Test::Spelling" : "0"
+            "Test::Spellunker" : "v0.0.3"
          }
       },
       "runtime" : {
@@ -61,14 +61,14 @@
    "provides" : {
       "Spellunker" : {
          "file" : "lib/Spellunker.pm",
-         "version" : "v0.0.2"
+         "version" : "v0.0.3"
       },
       "Spellunker::CLI" : {
          "file" : "lib/Spellunker/CLI.pm"
       },
       "Spellunker::CLI::Pod" : {
          "file" : "lib/Spellunker/CLI/Pod.pm",
-         "version" : "v0.0.2"
+         "version" : "v0.0.3"
       },
       "Spellunker::Pod" : {
          "file" : "lib/Spellunker/Pod.pm"
@@ -94,5 +94,5 @@
          "web" : "https://github.com/tokuhirom/Spellunker"
       }
    },
-   "version" : "v0.0.2"
+   "version" : "v0.0.3"
 }

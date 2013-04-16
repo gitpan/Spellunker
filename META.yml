@@ -27,12 +27,12 @@ no_index:
 provides:
   Spellunker:
     file: lib/Spellunker.pm
-    version: v0.0.2
+    version: v0.0.3
   Spellunker::CLI:
     file: lib/Spellunker/CLI.pm
   Spellunker::CLI::Pod:
     file: lib/Spellunker/CLI/Pod.pm
-    version: v0.0.2
+    version: v0.0.3
   Spellunker::Pod:
     file: lib/Spellunker/Pod.pm
   Spellunker::Pod::Parser:
@@ -55,4 +55,4 @@ resources:
   bugtracker: https://github.com/tokuhirom/Spellunker/issues
   homepage: https://github.com/tokuhirom/Spellunker
   repository: git://github.com/tokuhirom/Spellunker.git
-version: v0.0.2
+version: v0.0.3
