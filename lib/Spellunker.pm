@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.4");
+use version; our $VERSION = version->declare("v0.0.5");
 
 use Spellunker::WordList::Perl;
 use File::Spec ();
@@ -33,6 +33,7 @@ sub new {
 sub _load_user_dict {
     my $self = shift;
     my $home = $ENV{HOME};
+    return unless defined $home;
     return unless -d $home;
     my $dictpath = File::Spec->catfile($home, '.spellunker.en');
     if (-f $dictpath) {
@@ -44,9 +45,9 @@ sub load_dictionary {
     my ($self, $filename) = @_;
     open my $fh, '<', $filename
         or die "Cannot open '$filename' for reading: $!";
-    while (<$fh>) {
-        chomp;
-        $self->add_stopwords($_);
+    while (defined(my $line = <$fh>)) {
+        chomp $line;
+        $self->add_stopwords($line);
     }
 }
 
