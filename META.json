@@ -61,14 +61,14 @@
    "provides" : {
       "Spellunker" : {
          "file" : "lib/Spellunker.pm",
-         "version" : "v0.0.7"
+         "version" : "v0.0.8"
       },
       "Spellunker::CLI" : {
          "file" : "lib/Spellunker/CLI.pm"
       },
       "Spellunker::CLI::Pod" : {
          "file" : "lib/Spellunker/CLI/Pod.pm",
-         "version" : "v0.0.7"
+         "version" : "v0.0.8"
       },
       "Spellunker::Pod" : {
          "file" : "lib/Spellunker/Pod.pm"
@@ -80,7 +80,8 @@
          "file" : "lib/Spellunker/WordList/Perl.pm"
       },
       "Test::Spellunker" : {
-         "file" : "lib/Test/Spellunker.pm"
+         "file" : "lib/Test/Spellunker.pm",
+         "version" : "v0.0.8"
       }
    },
    "release_status" : "stable",
@@ -94,5 +95,5 @@
          "web" : "https://github.com/tokuhirom/Spellunker"
       }
    },
-   "version" : "v0.0.7"
+   "version" : "v0.0.8"
 }

@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.7");
+use version; our $VERSION = version->declare("v0.0.8");
 
 use Spellunker::WordList::Perl;
 use File::Spec ();
@@ -115,6 +115,9 @@ sub check_line {
     my @bad_words;
     for ( grep /\S/, split /[#~\|*=\[\]\/`"><: \t,.()?;!-]+/, $line) {
         s/\n//;
+
+        # special case
+        next if $_ eq "can't";
 
         if (
             m{
