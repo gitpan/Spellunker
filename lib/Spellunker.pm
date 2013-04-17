@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.5");
+use version; our $VERSION = version->declare("v0.0.6");
 
 use Spellunker::WordList::Perl;
 use File::Spec ();
@@ -63,14 +63,18 @@ sub check_word {
     my ($self, $word) = @_;
     return 0 unless defined $word;
 
+    if ($word =~ /\A_([a-z]+)_\z/) {
+        return $self->check_word($1);
+    }
+
     # 19xx 2xx
     return 1 if $word =~ /^[0-9]+(xx|yy)$/;
 
     # Method name
     return 1 if $word =~ /\A([a-zA-Z0-9]+_)+[a-zA-Z0-9]+\z/;
 
-    # Ignore 3 or 4 capital letter words like RFC, IETF.
-    return 1 if $word =~ /\A[A-Z]{3,4}\z/;
+    # Ignore 2, 3 or 4 capital letter words like RT, RFC, IETF.
+    return 1 if $word =~ /\A[A-Z]{2,4}\z/;
 
     # "foo" - quoted word
     if (my ($body) = ($word =~ /\A"(.+)"\z/)) {
@@ -109,16 +113,29 @@ sub check_line {
     $line = $self->_clean_text($line);
 
     my @bad_words;
-    for ( grep /\S/, split /[~\|*=\[\]\/`"><': \t,.()?;!-]+/, $line) {
+    for ( grep /\S/, split /[#~\|*=\[\]\/`"><: \t,.()?;!-]+/, $line) {
         s/\n//;
 
-        next if /^[0-9]+$/;
-        next if /^[A-Za-z]$/; # skip single character
-        next if /^[%\$\@*][A-Za-z_][A-Za-z0-9_]*$/; # perl variable
+        if (
+            m{
+                \A(.+)(?:
+                    n't  # doesn't
+                    |'ll # you'll
+                )\z
+            }x) {
+            push @bad_words, $self->check_line("$1");
+        } else {
+            for (split /'/, $_) {
+                next if length($_)==0;
+                next if /^[0-9]+$/;
+                next if /^[A-Za-z]$/; # skip single character
+                next if /^[%\$\@*][A-Za-z_][A-Za-z0-9_]*$/; # perl variable
+                next if /\A[.%#_]+\z/; # special characters
 
-
-        $self->check_word($_)
-            or push @bad_words, $_;
+                $self->check_word($_)
+                    or push @bad_words, $_;
+            }
+        }
     }
     return @bad_words;
 }
@@ -133,8 +150,6 @@ sub _clean_text {
     $text =~ s/(\w+::)+\w+/ /gs;    # Remove references to Perl modules
     $text =~ s/\s+/ /gs;
     $text =~ s/[()\@,;:"\/.]+/ /gs;     # Remove punctuation
-    $text =~ s/you'll/you will/gs;
-    $text =~ s/\bisn't\b/is not/gs;
 
     return $text;
 }
