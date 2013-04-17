@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.6");
+use version; our $VERSION = version->declare("v0.0.7");
 
 use Spellunker::WordList::Perl;
 use File::Spec ();
@@ -129,8 +129,8 @@ sub check_line {
                 next if length($_)==0;
                 next if /^[0-9]+$/;
                 next if /^[A-Za-z]$/; # skip single character
-                next if /^[%\$\@*][A-Za-z_][A-Za-z0-9_]*$/; # perl variable
-                next if /\A[.%#_]+\z/; # special characters
+                next if /^\\?[%\$\@*][A-Za-z_][A-Za-z0-9_]*$/; # perl variable
+                next if /\A[\\.\@%#_]+\z/; # special characters
 
                 $self->check_word($_)
                     or push @bad_words, $_;
