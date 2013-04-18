@@ -27,21 +27,19 @@ no_index:
 provides:
   Spellunker:
     file: lib/Spellunker.pm
-    version: v0.0.8
+    version: v0.0.9
   Spellunker::CLI:
     file: lib/Spellunker/CLI.pm
   Spellunker::CLI::Pod:
     file: lib/Spellunker/CLI/Pod.pm
-    version: v0.0.8
+    version: v0.0.9
   Spellunker::Pod:
     file: lib/Spellunker/Pod.pm
   Spellunker::Pod::Parser:
     file: lib/Spellunker/Pod/Parser.pm
-  Spellunker::WordList::Perl:
-    file: lib/Spellunker/WordList/Perl.pm
   Test::Spellunker:
     file: lib/Test/Spellunker.pm
-    version: v0.0.8
+    version: v0.0.9
 requires:
   File::ShareDir: 0
   Getopt::Long: 0
@@ -56,4 +54,4 @@ resources:
   bugtracker: https://github.com/tokuhirom/Spellunker/issues
   homepage: https://github.com/tokuhirom/Spellunker
   repository: git://github.com/tokuhirom/Spellunker.git
-version: v0.0.8
+version: v0.0.9

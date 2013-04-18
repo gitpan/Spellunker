@@ -4,9 +4,8 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.8");
+use version; our $VERSION = version->declare("v0.0.9");
 
-use Spellunker::WordList::Perl;
 use File::Spec ();
 use File::ShareDir ();
 use Regexp::Common qw /URI/;
@@ -21,10 +20,10 @@ my $MAIL_REGEX = (
 sub new {
     my $class = shift;
     my $self = bless {}, $class;
-    $self->add_stopwords(Spellunker::WordList::Perl->load_word_list);
 
     # From https://code.google.com/p/dotnetperls-controls/downloads/detail?name=enable1.tx
     $self->load_dictionary(File::Spec->catfile(File::ShareDir::dist_dir('Spellunker'), 'enable1.txt'));
+    $self->load_dictionary(File::Spec->catfile(File::ShareDir::dist_dir('Spellunker'), 'spellunker-dict.txt'));
 
     $self->_load_user_dict();
     return $self;
@@ -43,11 +42,12 @@ sub _load_user_dict {
 
 sub load_dictionary {
     my ($self, $filename) = @_;
-    open my $fh, '<', $filename
+    open my $fh, '<:utf8', $filename
         or die "Cannot open '$filename' for reading: $!";
     while (defined(my $line = <$fh>)) {
         chomp $line;
-        $self->add_stopwords($line);
+        $line =~ s/\s*#.*//; # remove comments.
+        $self->add_stopwords(split /\s+/, $line);
     }
 }
 
@@ -99,9 +99,30 @@ sub check_word {
         return 1 if $self->{stopwords}->{lc $word};
     }
 
-    # don't
-    if (my ($nt) = ($word =~ /\A(.+)n't\z/)) {
-        return $self->check_word($nt);
+    # cookies'
+    return 1 if $word =~ /\A(.*)s'\z/ && $self->check_word($1);
+    # You've
+    return 1 if $word =~ /\A(.*)'ve\z/ && $self->check_word($1);
+    # We're
+    return 1 if $word =~ /\A(.*)'re\z/ && $self->check_word($1);
+    # You'll
+    return 1 if $word =~ /\A(.*)'ll\z/ && $self->check_word($1);
+    # doesn't
+    return 1 if $word =~ /\A(.*)n't\z/ && $self->check_word($1);
+
+    ## Prefixes
+    return 1 if $word =~ /\Anon-(.*)\z/ && $self->check_word($1);
+    return 1 if $word =~ /\Are-(.*)\z/ && $self->check_word($1);
+
+    if ($word =~ /-/) {
+        my @words = split /-/, $word;
+        my $ok = 0;
+        for (@words) {
+            if ($self->check_word($_)) {
+                $ok++;
+            }
+        }
+        return 1 if @words == $ok;
     }
 
     return 0;
@@ -109,38 +130,53 @@ sub check_word {
 
 sub check_line {
     my ($self, $line) = @_;
+    return unless defined $line;
 
     $line = $self->_clean_text($line);
 
     my @bad_words;
-    for ( grep /\S/, split /[#~\|*=\[\]\/`"><: \t,.()?;!-]+/, $line) {
+    for ( grep /\S/, split /[#~\|*=\[\]\/`"<: \t,.()?;!]+/, $line) {
         s/\n//;
 
-        # special case
-        next if $_ eq "can't";
-
-        if (
-            m{
-                \A(.+)(?:
-                    n't  # doesn't
-                    |'ll # you'll
-                )\z
-            }x) {
-            push @bad_words, $self->check_line("$1");
+        if (/\A'(.*)'\z/) {
+            push @bad_words, $self->check_line($1);
         } else {
-            for (split /'/, $_) {
-                next if length($_)==0;
-                next if /^[0-9]+$/;
-                next if /^[A-Za-z]$/; # skip single character
-                next if /^\\?[%\$\@*][A-Za-z_][A-Za-z0-9_]*$/; # perl variable
-                next if /\A[\\.\@%#_]+\z/; # special characters
+            next if length($_)==0;
+            next if length($_)==1;
+            next if /^[0-9]+$/;
+            next if /^[A-Za-z]$/; # skip single character
+            next if /^\\?[%\$\@*][A-Za-z_][A-Za-z0-9_]*$/; # perl variable
+            next if /\A[\\.\@%#_]+\z/; # special characters
 
-                $self->check_word($_)
-                    or push @bad_words, $_;
-            }
+            # Ignore Text::MicroTemplate code.
+            next if /\A<%\z/;
+            next if /\A%>\z/;
+
+            # Perl method call
+            # Spellunker->bar
+            # Foo::Bar->bar
+            # $foo->bar
+            # $foo->bar()
+            next if _is_perl_method_call($_);
+
+            $self->check_word($_)
+                or push @bad_words, $_;
         }
     }
     return @bad_words;
+}
+
+sub _is_perl_method_call {
+    my $PERL_NAME = '[A-Za-z_][A-Za-z0-9_]*';
+    $_[0] =~ /\A
+        (?:
+            \$ $PERL_NAME
+            | ( $PERL_NAME :: )* $PERL_NAME
+        )
+        ->
+        $PERL_NAME
+        (?:\([^\)]*\))?
+    \z/x
 }
 
 sub _clean_text {

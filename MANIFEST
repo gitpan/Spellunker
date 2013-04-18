@@ -9,11 +9,11 @@ lib/Spellunker/CLI.pm
 lib/Spellunker/CLI/Pod.pm
 lib/Spellunker/Pod.pm
 lib/Spellunker/Pod/Parser.pm
-lib/Spellunker/WordList/Perl.pm
 lib/Test/Spellunker.pm
 script/spellunker
 script/spellunker-pod
 share/enable1.txt
+share/spellunker-dict.txt
 t/00_compile.t
 t/01_engine.t
 t/02_pod.t
