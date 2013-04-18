@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.10");
+use version; our $VERSION = version->declare("v0.0.11");
 
 use File::Spec ();
 use File::ShareDir ();
@@ -112,6 +112,8 @@ sub check_word {
     return 1 if $word =~ /\A(.*)'ll\z/ && $self->check_word($1);
     # doesn't
     return 1 if $word =~ /\A(.*)n't\z/ && $self->check_word($1);
+    # You'd
+    return 1 if $word =~ /\A(.*)'d\z/ && $self->check_word($1);
 
     ## Prefixes
     return 1 if $word =~ /\Anon-(.*)\z/ && $self->check_word($1);
