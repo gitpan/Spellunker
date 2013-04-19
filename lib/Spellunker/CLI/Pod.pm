@@ -5,7 +5,7 @@ use utf8;
 use Getopt::Long;
 use Spellunker::Pod;
 
-use version; our $VERSION = version->declare("v0.0.11");
+use version; our $VERSION = version->declare("v0.0.12");
 
 sub new {
     my $class = shift;
@@ -32,8 +32,8 @@ sub run {
             my $spellunker = Spellunker::Pod->new();
             my @err = $spellunker->check_file($filename);
             for (@err) {
-                my $lineno = shift @$_;
-                for (@$_) {
+                my ($lineno, $line, $errs) = @$_;
+                for (@$errs) {
                     print "$filename: $lineno: $_\n";
                 }
             }
@@ -45,8 +45,8 @@ sub run {
         my $spellunker = Spellunker::Pod->new();
         my @err = $spellunker->check_text($content);
         for (@err) {
-            my $lineno = shift @$_;
-            for (@$_) {
+            my ($lineno, $line, $errs) = @$_;
+            for (@$errs) {
                 print "$lineno: $_\n";
             }
         }

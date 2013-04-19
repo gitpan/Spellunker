@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.11");
+use version; our $VERSION = version->declare("v0.0.12");
 
 use File::Spec ();
 use File::ShareDir ();
@@ -49,7 +49,7 @@ sub load_dictionary {
         or die "Cannot open '$filename' for reading: $!";
     while (defined(my $line = <$fh>)) {
         chomp $line;
-        $line =~ s/\s*#.*//; # remove comments.
+        $line =~ s/\s*#.*$//; # remove comments.
         $self->add_stopwords(split /\s+/, $line);
     }
 }
@@ -84,9 +84,6 @@ sub check_word {
         return $self->check_word($body);
     }
 
-    # Dan's
-    $word =~ s!'s$!!;
-
     # good
     return 1 if $self->{stopwords}->{$word};
 
@@ -102,6 +99,8 @@ sub check_word {
         return 1 if $self->{stopwords}->{lc $word};
     }
 
+    # Dan's
+    return 1 if $word =~ /\A(.*)'s\z/ && $self->check_word($1);
     # cookies'
     return 1 if $word =~ /\A(.*)s'\z/ && $self->check_word($1);
     # You've
@@ -151,11 +150,17 @@ sub check_line {
             next if /^[0-9]+$/;
             next if /^[A-Za-z]$/; # skip single character
             next if /^\\?[%\$\@*][A-Za-z_][A-Za-z0-9_]*$/; # perl variable
-            next if /\A[\\.\@%#_]+\z/; # special characters
 
             # Ignore Text::MicroTemplate code.
-            next if /\A<%\z/;
-            next if /\A%>\z/;
+            # And do not care special character only word.
+            next if /\A[<%>\\.\@%#_]+\z/; # special characters
+
+            # Ignore command line options
+            next if /\A
+                --
+                (?: [a-z]+ - )+
+                [a-z]+
+            \z/x;
 
             # Perl method call
             # Spellunker->bar

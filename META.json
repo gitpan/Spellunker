@@ -44,7 +44,6 @@
             "File::ShareDir" : "0",
             "Getopt::Long" : "0",
             "Pod::Simple" : "3.26",
-            "Pod::Simple::Methody" : "0",
             "Regexp::Common" : "0",
             "Test::Builder" : "0",
             "parent" : "0",
@@ -61,14 +60,14 @@
    "provides" : {
       "Spellunker" : {
          "file" : "lib/Spellunker.pm",
-         "version" : "v0.0.11"
+         "version" : "v0.0.12"
       },
       "Spellunker::CLI" : {
          "file" : "lib/Spellunker/CLI.pm"
       },
       "Spellunker::CLI::Pod" : {
          "file" : "lib/Spellunker/CLI/Pod.pm",
-         "version" : "v0.0.11"
+         "version" : "v0.0.12"
       },
       "Spellunker::Pod" : {
          "file" : "lib/Spellunker/Pod.pm"
@@ -78,7 +77,7 @@
       },
       "Test::Spellunker" : {
          "file" : "lib/Test/Spellunker.pm",
-         "version" : "v0.0.11"
+         "version" : "v0.0.12"
       }
    },
    "release_status" : "stable",
@@ -92,5 +91,8 @@
          "web" : "https://github.com/tokuhirom/Spellunker"
       }
    },
-   "version" : "v0.0.11"
+   "version" : "v0.0.12",
+   "x_contributors" : [
+      "David Steinbrunner <dsteinbrunner@pobox.com>"
+   ]
 }

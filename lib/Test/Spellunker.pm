@@ -7,7 +7,7 @@ use Spellunker::Pod;
 
 use parent qw(Exporter);
 
-use version; our $VERSION = version->declare("v0.0.11");
+use version; our $VERSION = version->declare("v0.0.12");
 
 use Test::Builder;
 use File::Spec;
@@ -100,8 +100,8 @@ sub pod_file_spelling_ok {
     if (!$ok) {
         my $msg = "Errors:\n";
         for (@err) {
-            my $lineno = shift @$_;
-            for my $err (@$_) {
+            my ($lineno, $line, $errs) = @$_;
+            for my $err (@$errs) {
                 $msg .= "    $lineno: $err\n";
             }
         }
