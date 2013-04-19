@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.12");
+use version; our $VERSION = version->declare("v0.0.13");
 
 use File::Spec ();
 use File::ShareDir ();
@@ -66,6 +66,9 @@ sub check_word {
     my ($self, $word) = @_;
     return 0 unless defined $word;
 
+    # There is no alphabetical characters.
+    return 1 if $word !~ /[A-Za-z]/;
+
     if ($word =~ /\A_([a-z]+)_\z/) {
         return $self->check_word($1);
     }
@@ -76,8 +79,9 @@ sub check_word {
     # Method name
     return 1 if $word =~ /\A([a-zA-Z0-9]+_)+[a-zA-Z0-9]+\z/;
 
-    # Ignore 2, 3 or 4 capital letter words like RT, RFC, IETF.
-    return 1 if $word =~ /\A[A-Z]{2,4}\z/;
+    # Ignore apital letter words like RT, RFC, IETF.
+    # And so "IT'S" should be allow.
+    return 1 if $word =~ /\A[A-Z']+\z/;
 
     # "foo" - quoted word
     if (my ($body) = ($word =~ /\A"(.+)"\z/)) {
@@ -113,7 +117,14 @@ sub check_word {
     return 1 if $word =~ /\A(.*)n't\z/ && $self->check_word($1);
     # You'd
     return 1 if $word =~ /\A(.*)'d\z/ && $self->check_word($1);
+    # Perl-ish
+    return 1 if $word =~ /\A(.*)-ish\z/ && $self->check_word($1);
+    # {at}
+    return 1 if $word =~ /\A\{(.*)\}\z/ && $self->check_word($1);
+    # com>
+    return 1 if $word =~ /\A(.*)>\z/ && $self->check_word($1);
 
+    # comE<gt>
     ## Prefixes
     return 1 if $word =~ /\Anon-(.*)\z/ && $self->check_word($1);
     return 1 if $word =~ /\Are-(.*)\z/ && $self->check_word($1);
@@ -137,6 +148,7 @@ sub check_line {
     return unless defined $line;
 
     $line = $self->_clean_text($line);
+    return unless defined $line;
 
     my @bad_words;
     for ( grep /\S/, split /[#~\|*=\[\]\/`"<: \t,.()?;!]+/, $line) {
@@ -155,6 +167,9 @@ sub check_line {
             # And do not care special character only word.
             next if /\A[<%>\\.\@%#_]+\z/; # special characters
 
+            # JSON::XS-ish boolean value
+            next if /\A\\[01]\z/;
+
             # Ignore command line options
             next if /\A
                 --
@@ -162,12 +177,7 @@ sub check_line {
                 [a-z]+
             \z/x;
 
-            # Perl method call
-            # Spellunker->bar
-            # Foo::Bar->bar
-            # $foo->bar
-            # $foo->bar()
-            next if _is_perl_method_call($_);
+            next if _is_perl_code($_);
 
             $self->check_word($_)
                 or push @bad_words, $_;
@@ -176,9 +186,22 @@ sub check_line {
     return @bad_words;
 }
 
-sub _is_perl_method_call {
+    # Perl method call
+sub _is_perl_code {
     my $PERL_NAME = '[A-Za-z_][A-Za-z0-9_]*';
-    $_[0] =~ /\A
+
+    # Class name
+    # Foo::Bar
+    return 1 if $_[0] =~ /\A
+        (?: $PERL_NAME :: )+
+        $PERL_NAME
+    \z/x;
+
+    # Spellunker->bar
+    # Foo::Bar->bar
+    # $foo->bar
+    # $foo->bar()
+    return 1 if $_[0] =~ /\A
         (?:
             \$ $PERL_NAME
             | ( $PERL_NAME :: )* $PERL_NAME
@@ -186,7 +209,14 @@ sub _is_perl_method_call {
         ->
         $PERL_NAME
         (?:\([^\)]*\))?
-    \z/x
+    \z/x;
+
+    # hash access
+    return 1 if $_[0] =~ /\A
+        \$ $PERL_NAME \{ $PERL_NAME \}
+    \z/x;
+
+    return 0;
 }
 
 sub _clean_text {
@@ -196,7 +226,6 @@ sub _clean_text {
     $text =~ s!<$MAIL_REGEX>|$MAIL_REGEX!!; # Remove E-mail address.
     $text =~ s!$RE{URI}{HTTP}!!g; # Remove HTTP URI
     $text =~ s!\(C\)!!gi; # Copyright mark
-    $text =~ s/(\w+::)+\w+/ /gs;    # Remove references to Perl modules
     $text =~ s/\s+/ /gs;
     $text =~ s/[()\@,;:"\/.]+/ /gs;     # Remove punctuation
 

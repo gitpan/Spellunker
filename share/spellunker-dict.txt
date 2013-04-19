@@ -92,7 +92,9 @@ uWSGI
 webserver
 can't
 yaml
-Ingy döt Net
+Ingy
+döt
+Net
 Achim
 Adam
 Cushing
@@ -394,3 +396,16 @@ dzil
 md # extension for markdown
 foo
 spellunker
+org
+transformability
+etc
+kazuhooku
+charsbar
+dragon3
+memcached
+pid
+jQuery
+com
+multibyte
+MySQL
+kazeburo
