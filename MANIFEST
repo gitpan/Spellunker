@@ -20,5 +20,6 @@ t/02_pod.t
 t/03_test_itself.t
 t/dat/fail.pod
 t/dat/ok.pod
+t/rules/looks_like_perl_code.t
 META.yml
 MANIFEST

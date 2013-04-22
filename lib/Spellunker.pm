@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.13");
+use version; our $VERSION = version->declare("v0.0.14");
 
 use File::Spec ();
 use File::ShareDir ();
@@ -66,6 +66,13 @@ sub check_word {
     my ($self, $word) = @_;
     return 0 unless defined $word;
 
+    return 1 if looks_like_perl_code($word);
+
+    return 1 if length($word)==0;
+    return 1 if length($word)==1;
+    return 1 if $word =~ /^[0-9]+$/;
+    return 1 if $word =~ /^[A-Za-z]$/; # skip single character
+
     # There is no alphabetical characters.
     return 1 if $word !~ /[A-Za-z]/;
 
@@ -78,6 +85,14 @@ sub check_word {
 
     # Method name
     return 1 if $word =~ /\A([a-zA-Z0-9]+_)+[a-zA-Z0-9]+\z/;
+
+    # Extensions
+    return 1 if $word =~ /\A\.[a-zA-Z0-9]{2,4}\z/;
+
+    # File name
+    return 1 if $word =~ /\A[a-zA-Z0-9-]+\.[a-zA-Z0-9]{1,4}\z/;
+
+    return 1 if $self->looks_like_domain($word);
 
     # Ignore apital letter words like RT, RFC, IETF.
     # And so "IT'S" should be allow.
@@ -122,12 +137,25 @@ sub check_word {
     # {at}
     return 1 if $word =~ /\A\{(.*)\}\z/ && $self->check_word($1);
     # com>
-    return 1 if $word =~ /\A(.*)>\z/ && $self->check_word($1);
+    # following:
+    return 1 if $word =~ /\A(.*)[>:]\z/ && $self->check_word($1);
+    return 1 if $word =~ /\A(.*)\.+\z/ && $self->check_word($1);
 
     # comE<gt>
     ## Prefixes
     return 1 if $word =~ /\Anon-(.*)\z/ && $self->check_word($1);
     return 1 if $word =~ /\Are-(.*)\z/ && $self->check_word($1);
+    # +MyApp::Plugin::FooBar
+    return 1 if $word =~ /\A\+(.*)\z/ && $self->check_word($1);
+
+    # :Str - Moose-ish type definition
+    return 1 if $word =~ /\A
+        :
+        (?:[A-Z][a-z]+)+
+    \z/x;
+
+    # IRC channel name
+    return 1 if $word =~ /\A#[a-z0-9-]+\z/;
 
     if ($word =~ /-/) {
         my @words = split /-/, $word;
@@ -143,6 +171,14 @@ sub check_word {
     return 0;
 }
 
+sub looks_like_domain {
+    my ($self, $word) = @_;
+    return 1 if $word =~ /\A
+        ([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}
+    \z/x;
+    return 0;
+}
+
 sub check_line {
     my ($self, $line) = @_;
     return unless defined $line;
@@ -151,24 +187,23 @@ sub check_line {
     return unless defined $line;
 
     my @bad_words;
-    for ( grep /\S/, split /[#~\|*=\[\]\/`"<: \t,.()?;!]+/, $line) {
+    for ( grep /\S/, split /[~\|*=\[\]\/`"< \t,()?;!]+/, $line) {
         s/\n//;
 
         if (/\A'(.*)'\z/) {
             push @bad_words, $self->check_line($1);
+        } elsif (/\A(.*)\.\z/) { # The word ended by dot
+            my $word = $1;
+            $self->check_word($word)
+                or push @bad_words, $word;
+        } elsif (/\./) { # The word includes dot
+            $self->check_word($_)
+                or push @bad_words, $_;
         } else {
-            next if length($_)==0;
-            next if length($_)==1;
-            next if /^[0-9]+$/;
-            next if /^[A-Za-z]$/; # skip single character
-            next if /^\\?[%\$\@*][A-Za-z_][A-Za-z0-9_]*$/; # perl variable
-
             # Ignore Text::MicroTemplate code.
             # And do not care special character only word.
             next if /\A[<%>\\.\@%#_]+\z/; # special characters
 
-            # JSON::XS-ish boolean value
-            next if /\A\\[01]\z/;
 
             # Ignore command line options
             next if /\A
@@ -177,8 +212,6 @@ sub check_line {
                 [a-z]+
             \z/x;
 
-            next if _is_perl_code($_);
-
             $self->check_word($_)
                 or push @bad_words, $_;
         }
@@ -186,14 +219,25 @@ sub check_line {
     return @bad_words;
 }
 
-    # Perl method call
-sub _is_perl_code {
+sub looks_like_perl_code {
     my $PERL_NAME = '[A-Za-z_][A-Za-z0-9_]*';
 
     # Class name
     # Foo::Bar
     return 1 if $_[0] =~ /\A
+        \$?
         (?: $PERL_NAME :: )+
+        $PERL_NAME
+    \z/x;
+
+    # $foo
+    # %foo
+    # @foo
+    # *foo
+    # \$foo
+    return 1 if $_[0] =~ /\A
+        \\?
+        [\*\@\$\%]
         $PERL_NAME
     \z/x;
 
@@ -216,6 +260,14 @@ sub _is_perl_code {
         \$ $PERL_NAME \{ $PERL_NAME \}
     \z/x;
 
+    # hashref access
+    return 1 if $_[0] =~ /\A
+        \$ $PERL_NAME -> \{ $PERL_NAME \}
+    \z/x;
+
+    # JSON::XS-ish boolean value
+    return 1 if $_[0] eq '\1' || $_[0] eq '\1';
+
     return 0;
 }
 
@@ -227,7 +279,7 @@ sub _clean_text {
     $text =~ s!$RE{URI}{HTTP}!!g; # Remove HTTP URI
     $text =~ s!\(C\)!!gi; # Copyright mark
     $text =~ s/\s+/ /gs;
-    $text =~ s/[()\@,;:"\/.]+/ /gs;     # Remove punctuation
+    $text =~ s/[()\,;"\/]+/ /gs;     # Remove punctuation
 
     return $text;
 }
