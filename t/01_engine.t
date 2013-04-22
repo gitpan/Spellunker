@@ -92,3 +92,12 @@ You can pass a %args.
 .jpeg file
 pod-spell.t
 why...
+<p>hoge</p>
+you can redistribute it and/or modify
+5.8.x
+5.10.x
++MyApp::Plugin::FooBar
+\x2f
+JSON::PP::
+U+002F
+\x00-\x1f\x22\x2f\x5c
