@@ -18,8 +18,10 @@ t/00_compile.t
 t/01_engine.t
 t/02_pod.t
 t/03_test_itself.t
+t/04_fail.t
 t/dat/fail.pod
 t/dat/ok.pod
+t/rules/looks_like_file_path.t
 t/rules/looks_like_perl_code.t
 META.yml
 MANIFEST

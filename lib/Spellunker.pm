@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.15");
+use version; our $VERSION = version->declare("v0.0.16");
 
 use File::Spec ();
 use File::ShareDir ();
@@ -66,22 +66,16 @@ sub check_word {
     my ($self, $word) = @_;
     return 0 unless defined $word;
 
-    return 1 if looks_like_perl_code($word);
-
     return 1 if length($word)==0;
     return 1 if length($word)==1;
-    return 1 if $word =~ /^[0-9]+$/;
-    return 1 if $word =~ /^[A-Za-z]$/; # skip single character
 
     # There is no alphabetical characters.
     return 1 if $word !~ /[A-Za-z]/;
 
-    if ($word =~ /\A_([a-z]+)_\z/) {
-        return $self->check_word($1);
-    }
-
     # 19xx 2xx
     return 1 if $word =~ /^[0-9]+(xx|yy)$/;
+    # 4th
+    return 1 if $word =~ /^[0-9]+(th)$/;
 
     # Method name
     return 1 if $word =~ /\A([a-zA-Z0-9]+_)+[a-zA-Z0-9]+\z/;
@@ -92,16 +86,15 @@ sub check_word {
     # File name
     return 1 if $word =~ /\A[a-zA-Z0-9-]+\.[a-zA-Z0-9]{1,4}\z/;
 
-    return 1 if $self->looks_like_domain($word);
+    return 1 if looks_like_domain($word);
+    return 1 if looks_like_perl_code($word);
+    return 1 if looks_like_file_path($word);
 
-    # Ignore apital letter words like RT, RFC, IETF.
+    # Ignore capital letter words like RT, RFC, IETF.
     # And so "IT'S" should be allow.
-    return 1 if $word =~ /\A[A-Z']+\z/;
-
-    # "foo" - quoted word
-    if (my ($body) = ($word =~ /\A"(.+)"\z/)) {
-        return $self->check_word($body);
-    }
+    # AUTHORS
+    # APIs
+    return 1 if $word =~ /\A [A-Z']+ s? \z/x;
 
     # good
     return 1 if $self->{stopwords}->{$word};
@@ -113,33 +106,25 @@ sub check_word {
         return 1;
     }
 
-    # AUTHORS
-    if ($word =~ /\A[A-Z]+\z/) {
-        return 1 if $self->{stopwords}->{lc $word};
+    # CamelCase-ed word like "McCamant"
+    if ($word =~ /\A [A-Z][a-z]+ (?:[A-Z][a-z]+)+ \z/x) {
+        return 1;
     }
 
-    # Dan's
-    return 1 if $word =~ /\A(.*)'s\z/ && $self->check_word($1);
-    # cookies'
-    return 1 if $word =~ /\A(.*)s'\z/ && $self->check_word($1);
-    # You've
-    return 1 if $word =~ /\A(.*)'ve\z/ && $self->check_word($1);
-    # We're
-    return 1 if $word =~ /\A(.*)'re\z/ && $self->check_word($1);
-    # You'll
-    return 1 if $word =~ /\A(.*)'ll\z/ && $self->check_word($1);
-    # doesn't
-    return 1 if $word =~ /\A(.*)n't\z/ && $self->check_word($1);
-    # You'd
-    return 1 if $word =~ /\A(.*)'d\z/ && $self->check_word($1);
-    # Perl-ish
-    return 1 if $word =~ /\A(.*)-ish\z/ && $self->check_word($1);
-    # {at}
-    return 1 if $word =~ /\A\{(.*)\}\z/ && $self->check_word($1);
-    # com>
-    # following:
-    return 1 if $word =~ /\A(.*)[>:]\z/ && $self->check_word($1);
-    return 1 if $word =~ /\A(.*)\.+\z/ && $self->check_word($1);
+    # Suffix rules
+    return 1 if $word =~ /\A
+        (.*?)
+        (?:
+            's   # Dan's
+          | s'   # cookies'
+          | 've  # You've
+          | 're  # We're
+          | 'll  # You'll
+          | n't  # doesn't
+          | 'd   # You'd
+          | -ish # -ish
+        )
+    \z/x && $self->check_word($1);
 
     # comE<gt>
     ## Prefixes
@@ -158,7 +143,13 @@ sub check_word {
     # IRC channel name
     return 1 if $word =~ /\A#[a-z0-9-]+\z/;
 
-    my $symbols = quotemeta q!(),;"'+-/><\\!;
+    my $symbols = quotemeta q!$:{}._(),;"'+-/><\\!;
+
+    # Suffix
+    return 1 if $word =~ /\A(.*)[$symbols]\z/ && $self->check_word($1);
+    # Prefix
+    return 1 if $word =~ /\A[$symbols](.*)\z/ && $self->check_word($1);
+
     if ($word =~ /[$symbols]+/) {
         my @words = split /[$symbols]+/, $word;
         my $ok = 0;
@@ -173,8 +164,28 @@ sub check_word {
     return 0;
 }
 
+sub looks_like_file_path {
+    my ($word) = @_;
+
+    # ~/
+    # ~/foo/
+    # ~foo/
+    # /dev/tty
+    # t/01_simple.t
+    return 1 if $word =~ m{\A
+        (?:
+            ~ [a-zA-Z0-9_.-]* / (?: [a-z0-9A-Z_.-]+ / )* (?: [a-z0-9A-Z_.-]+ )?
+        |
+            / (?: [a-z0-9A-Z_.-]+ / )* (?: [a-z0-9A-Z_.]+ )?
+        |
+            (?: [a-z0-9A-Z_.-]+ / )+ (?: [a-z0-9A-Z_.]+ )?
+        )
+    \z}x;
+    return 0;
+}
+
 sub looks_like_domain {
-    my ($self, $word) = @_;
+    my ($word) = @_;
     return 1 if $word =~ /\A
         ([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}
     \z/x;
@@ -185,11 +196,11 @@ sub check_line {
     my ($self, $line) = @_;
     return unless defined $line;
 
-    $line = $self->_clean_text($line);
-    return unless defined $line;
+    $line =~ s!<$MAIL_REGEX>|$MAIL_REGEX!!; # Remove E-mail address.
+    $line =~ s!$RE{URI}{HTTP}!!g;           # Remove HTTP URI
 
     my @bad_words;
-    for ( grep /\S/, split /[~\|*=\[\]`" \t,()?;!]+/, $line) {
+    for ( grep /\S/, split /[\|*=\[\]`" \t,()?;!]+/, $line) {
         s/\n//;
 
         if (/\A'(.*)'\z/) {
@@ -202,11 +213,6 @@ sub check_line {
             $self->check_word($_)
                 or push @bad_words, $_;
         } else {
-            # Ignore Text::MicroTemplate code.
-            # And do not care special character only word.
-            next if /\A[<%>\\.\@%#_]+\z/; # special characters
-
-
             # Ignore command line options
             next if /\A
                 --
@@ -228,7 +234,7 @@ sub looks_like_perl_code {
     # Foo::Bar
     # JSON::PP::
     return 1 if $_[0] =~ /\A
-        \$?
+        [\+\$]?
         (?: $PERL_NAME :: )+
         $PERL_NAME
         $PERL_NAME?
@@ -292,18 +298,6 @@ sub looks_like_perl_code {
     return 1 if $_[0] eq '\1' || $_[0] eq '\1';
 
     return 0;
-}
-
-sub _clean_text {
-    my ($self, $text) = @_;
-    return unless $text;
-
-    $text =~ s!<$MAIL_REGEX>|$MAIL_REGEX!!; # Remove E-mail address.
-    $text =~ s!$RE{URI}{HTTP}!!g; # Remove HTTP URI
-    $text =~ s!\(C\)!!gi; # Copyright mark
-    $text =~ s/\s+/ /gs;
-
-    return $text;
 }
 
 1;
