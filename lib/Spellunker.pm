@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.16");
+use version; our $VERSION = version->declare("v0.0.17");
 
 use File::Spec ();
 use File::ShareDir ();
@@ -16,6 +16,8 @@ my $MAIL_REGEX = (
     q{~]|\\\\[\x09 -~])*")@[-!#-'*+/-9=?A-Z^-~]+(?:\.[-!#-'*+/-9=?A-Z^-~]+} .
     q{)*}
 );
+
+my $SYMBOLS = quotemeta q!$:{}._(),;"'+-/><\\!;
 
 sub new {
     my $class = shift;
@@ -143,15 +145,13 @@ sub check_word {
     # IRC channel name
     return 1 if $word =~ /\A#[a-z0-9-]+\z/;
 
-    my $symbols = quotemeta q!$:{}._(),;"'+-/><\\!;
-
     # Suffix
-    return 1 if $word =~ /\A(.*)[$symbols]\z/ && $self->check_word($1);
+    return 1 if $word =~ /\A(.*)[$SYMBOLS]\z/ && $self->check_word($1);
     # Prefix
-    return 1 if $word =~ /\A[$symbols](.*)\z/ && $self->check_word($1);
+    return 1 if $word =~ /\A[$SYMBOLS](.*)\z/ && $self->check_word($1);
 
-    if ($word =~ /[$symbols]+/) {
-        my @words = split /[$symbols]+/, $word;
+    if ($word =~ /[$SYMBOLS]+/) {
+        my @words = split /[$SYMBOLS]+/, $word;
         my $ok = 0;
         for (@words) {
             if ($self->check_word($_)) {
@@ -200,7 +200,7 @@ sub check_line {
     $line =~ s!$RE{URI}{HTTP}!!g;           # Remove HTTP URI
 
     my @bad_words;
-    for ( grep /\S/, split /[\|*=\[\]`" \t,()?;!]+/, $line) {
+    for ( grep /\S/, split /[\|*=\[\]`" \t,?;!]+/, $line) {
         s/\n//;
 
         if (/\A'(.*)'\z/) {
@@ -238,6 +238,17 @@ sub looks_like_perl_code {
         (?: $PERL_NAME :: )+
         $PERL_NAME
         $PERL_NAME?
+    \z/x;
+
+    # foo()
+    return 1 if $_[0] =~ /\A
+        $PERL_NAME
+        \(
+            \s*
+            ( \$ $PERL_NAME \s* , \s*  )*
+            ( \$ $PERL_NAME )?
+            \s*
+        \)
     \z/x;
 
     # 5.8.x
@@ -343,6 +354,10 @@ Check the text and returns bad word list.
 =head1 HOW DO I USE CUSTOM DICTIONARY?
 
 You can put your personal dictionary at C<$HOME/.spellunker.en>.
+
+=head1 WHY DOES SPELLUNKER NOT IGNORE PERL CODE?
+
+In some case, Spellunker does not ignore the perl code. You need to wrap it by C<< C< > >>.
 
 =head1 LICENSE
 

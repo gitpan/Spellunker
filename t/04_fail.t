@@ -5,13 +5,15 @@ use Test::More;
 use Spellunker;
 use Data::Dumper;
 
+BEGIN { $ENV{PERL_SPELLUNKER_NO_USER_DICT} = 1 }
+
 my $spellunker = Spellunker->new();
 while (<DATA>) {
     next unless /\S/;
     chomp;
     my @bad = $spellunker->check_line($_);
     isnt(0+@bad, 0, $_);
-    diag Dumper(\@bad);
+    note Dumper(\@bad);
 }
 
 done_testing;
