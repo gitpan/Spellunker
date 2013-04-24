@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.2.1");
+use version; our $VERSION = version->declare("v0.2.2");
 
 use Scalar::Util ();
 use File::Spec ();
@@ -370,6 +370,10 @@ You can put your personal dictionary at C<$HOME/.spellunker.en>.
 =head1 WHY DOES SPELLUNKER NOT IGNORE PERL CODE?
 
 In some case, Spellunker does not ignore the perl code. You need to wrap it by C<< C< > >>.
+
+=head1 CONTRIBUTION
+
+You can send me pull-request on github
 
 =head1 LICENSE
 

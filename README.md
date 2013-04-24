@@ -17,6 +17,10 @@ If you want to use this spelling checker in test script, you can use [Test::Spel
 
     Create new instance.
 
+- $spellunker->load\_dictionary($filename\_or\_fh)
+
+    Loads stopwords from `$filename_or_fh` and adds them to the on-memory dictionary.
+
 - $spellunker->add\_stopwords(@stopwords)
 
     Add some `@stopwords` to the on memory dictionary.
@@ -36,6 +40,10 @@ You can put your personal dictionary at `$HOME/.spellunker.en`.
 # WHY DOES SPELLUNKER NOT IGNORE PERL CODE?
 
 In some case, Spellunker does not ignore the perl code. You need to wrap it by `` ``.
+
+# CONTRIBUTION
+
+You can send me pull-request on github
 
 # LICENSE
 
