@@ -4,8 +4,9 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.1.0");
+use version; our $VERSION = version->declare("v0.2.1");
 
+use Scalar::Util ();
 use File::Spec ();
 use File::ShareDir ();
 use Regexp::Common qw /URI/;
@@ -46,14 +47,21 @@ sub _load_user_dict {
 }
 
 sub load_dictionary {
-    my ($self, $filename) = @_;
-    open my $fh, '<:utf8', $filename
-        or die "Cannot open '$filename' for reading: $!";
-    while (defined(my $line = <$fh>)) {
-        chomp $line;
-        $line =~ s/\s*#.*$//; # remove comments.
-        $self->add_stopwords(split /\s+/, $line);
+    my ($self, $filename_or_fh) = @_;
+
+    my $fh;
+    if (Scalar::Util::openhandle($filename_or_fh)) {
+        $fh = $filename_or_fh;
     }
+    else {
+        open $fh, '<:utf8', $filename_or_fh
+            or die "Cannot open '$filename_or_fh' for reading: $!";
+    }
+
+    local $/;
+    my $chunk = <$fh>;
+    $chunk =~ s/\#[^\n]*$//xmsg; # remove comments.
+    $self->add_stopwords(split ' ', $chunk);
 }
 
 sub add_stopwords {
@@ -336,6 +344,10 @@ If you want to use this spelling checker in test script, you can use L<Test::Spe
 =item my $spellunker = Spellunker->new();
 
 Create new instance.
+
+=item $spellunker->load_dictionary($filename_or_fh)
+
+Loads stopwords from C<$filename_or_fh> and adds them to the on-memory dictionary.
 
 =item $spellunker->add_stopwords(@stopwords)
 
