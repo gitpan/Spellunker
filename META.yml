@@ -27,19 +27,19 @@ no_index:
 provides:
   Spellunker:
     file: lib/Spellunker.pm
-    version: v0.2.2
+    version: v0.2.3
   Spellunker::CLI:
     file: lib/Spellunker/CLI.pm
   Spellunker::CLI::Pod:
     file: lib/Spellunker/CLI/Pod.pm
-    version: v0.2.2
+    version: v0.2.3
   Spellunker::Pod:
     file: lib/Spellunker/Pod.pm
   Spellunker::Pod::Parser:
     file: lib/Spellunker/Pod/Parser.pm
   Test::Spellunker:
     file: lib/Test/Spellunker.pm
-    version: v0.2.2
+    version: v0.2.3
 requires:
   File::ShareDir: 0
   Getopt::Long: 0
@@ -53,7 +53,7 @@ resources:
   bugtracker: https://github.com/tokuhirom/Spellunker/issues
   homepage: https://github.com/tokuhirom/Spellunker
   repository: git://github.com/tokuhirom/Spellunker.git
-version: v0.2.2
+version: v0.2.3
 x_contributors:
   - 'David Steinbrunner <dsteinbrunner@pobox.com>'
   - 'Kentaro Kuribayashi <kentarok@gmail.com>'
