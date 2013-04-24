@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.0.17");
+use version; our $VERSION = version->declare("v0.1.0");
 
 use File::Spec ();
 use File::ShareDir ();
@@ -196,8 +196,8 @@ sub check_line {
     my ($self, $line) = @_;
     return unless defined $line;
 
-    $line =~ s!<$MAIL_REGEX>|$MAIL_REGEX!!; # Remove E-mail address.
-    $line =~ s!$RE{URI}{HTTP}!!g;           # Remove HTTP URI
+    $line =~ s!<$MAIL_REGEX>|$MAIL_REGEX!!;            # Remove E-mail address.
+    $line =~ s!$RE{URI}{HTTP}{-scheme => 'https?'}!!g; # Remove HTTPS? URI
 
     my @bad_words;
     for ( grep /\S/, split /[\|*=\[\]`" \t,?;!]+/, $line) {
