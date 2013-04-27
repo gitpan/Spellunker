@@ -525,3 +525,11 @@ OAuth2
 facebook
 loctouch
 ua
+hashrefs
+httpd
+colourful
+segv
+eof
+x-up-devcap-multimedia
+&apos;
+big-endian

@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.2.3");
+use version; our $VERSION = version->declare("v0.2.4");
 
 use Scalar::Util ();
 use File::Spec ();
@@ -207,7 +207,7 @@ sub check_line {
     $line =~ s!$RE{URI}{HTTP}{-scheme => 'https?'}!!g; # Remove HTTPS? URI
 
     my @bad_words;
-    for ( grep /\S/, split /[\|*=\[\]`" \t,?;!]+/, $line) {
+    for ( grep /\S/, split /[\|*=\[\]`" \t,?!]+/, $line) {
         s/\n//;
 
         if (/\A'(.*)'\z/) {
