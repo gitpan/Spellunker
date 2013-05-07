@@ -241,6 +241,7 @@ subclasses
 subdirectories
 subdirectory
 subobjects
+submodules
 symlinked
 terminal's
 timestamp
@@ -533,3 +534,5 @@ eof
 x-up-devcap-multimedia
 &apos;
 big-endian
+autobox
+bool
