@@ -541,3 +541,7 @@ woremacx
 dailyflower
 libxml
 XPath
+groonga
+chroot
+catfile
+catdir
