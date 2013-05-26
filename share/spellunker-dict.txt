@@ -545,3 +545,8 @@ groonga
 chroot
 catfile
 catdir
+mysql
+uid
+lexer
+goccy
+uninstall

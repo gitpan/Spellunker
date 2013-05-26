@@ -7,7 +7,7 @@ use Spellunker::Pod;
 
 use parent qw(Exporter);
 
-use version; our $VERSION = version->declare("v0.2.7");
+use version; our $VERSION = version->declare("v0.2.8");
 
 use Test::Builder;
 use File::Spec;
@@ -24,6 +24,8 @@ our @EXPORT = qw(
 my $TEST = Test::Builder->new();
 
 sub all_pod_files_spelling_ok {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     my @files = all_pod_files(@_);
 
     $TEST->plan(tests => scalar @files);
@@ -37,7 +39,7 @@ sub all_pod_files_spelling_ok {
 
 sub _starting_points {
     return 'blib' if -d 'blib';
-    return 'lib';
+    return grep -d, qw(bin lib script);
 }
 
 sub all_pod_files {
@@ -146,13 +148,9 @@ each file/directory, and declares a "plan" in Test::More for you (one
 test for each file), so you must not call "plan" yourself.
 
 If @files is empty, the function finds all POD files in the blib
-directory if it exists, or the lib directory if it does not. A POD file
-is one that ends with .pod, .pl, .plx, or .pm; or any file where the
-first line looks like a perl shebang line.
-
-If there is no working spellchecker (determined by
-"has_working_spellchecker"), this test will issue a "skip all"
-directive.
+directory; or the lib, bin and scripts directories if blib does not exist.
+A POD file is one that ends with .pod, .pl, .plx, or .pm; or any file
+where the first line looks like a perl shebang line.
 
 If you're testing a distribution, just create a t/pod-spell.t with the
 code in the "SYNOPSIS".
