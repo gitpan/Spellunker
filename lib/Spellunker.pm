@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.2.9");
+use version; our $VERSION = version->declare("v0.3.0");
 
 use Scalar::Util ();
 use File::Spec ();
@@ -80,6 +80,9 @@ sub check_word {
 
     # There is no alphabetical characters.
     return 1 if $word !~ /[A-Za-z]/;
+
+    # git sha1
+    return 1 if $word =~ /\A[a-z0-9]{40}\z/;
 
     # 19xx 2xx
     return 1 if $word =~ /^[0-9]+(xx|yy)$/;

@@ -555,3 +555,7 @@ hasegawayosuke
 __defineSetter__
 RSpec
 htmlspecialchars
+GeJ
+mimick
+argv
+app
