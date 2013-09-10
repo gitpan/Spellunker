@@ -4,7 +4,7 @@
       "tokuhirom <tokuhirom@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v0.4.9",
+   "generated_by" : "Minilla/v0.6.5",
    "license" : "perl_5",
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
@@ -59,14 +59,14 @@
    "provides" : {
       "Spellunker" : {
          "file" : "lib/Spellunker.pm",
-         "version" : "v0.3.0"
+         "version" : "v0.3.1"
       },
       "Spellunker::CLI" : {
          "file" : "lib/Spellunker/CLI.pm"
       },
       "Spellunker::CLI::Pod" : {
          "file" : "lib/Spellunker/CLI/Pod.pm",
-         "version" : "v0.3.0"
+         "version" : "v0.3.1"
       },
       "Spellunker::Pod" : {
          "file" : "lib/Spellunker/Pod.pm"
@@ -76,7 +76,7 @@
       },
       "Test::Spellunker" : {
          "file" : "lib/Test/Spellunker.pm",
-         "version" : "v0.3.0"
+         "version" : "v0.3.1"
       }
    },
    "release_status" : "stable",
@@ -90,7 +90,7 @@
          "web" : "https://github.com/tokuhirom/Spellunker"
       }
    },
-   "version" : "v0.3.0",
+   "version" : "v0.3.1",
    "x_contributors" : [
       "David Steinbrunner <dsteinbrunner@pobox.com>",
       "Kentaro Kuribayashi <kentarok@gmail.com>",

@@ -21,6 +21,7 @@ t/03_test_itself.t
 t/04_fail.t
 t/05_load_dictionary.t
 t/06_comments_in_dict.t
+t/07_multibyte.t
 t/dat/fail.pod
 t/dat/ok.pod
 t/rules/looks_like_file_path.t
