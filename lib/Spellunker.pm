@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use utf8;
 use 5.008001;
 
-use version; our $VERSION = version->declare("v0.3.1");
+use version; our $VERSION = version->declare("v0.4.0");
 
 use Scalar::Util ();
 use File::Spec ();
@@ -69,6 +69,11 @@ sub add_stopwords {
         $self->{stopwords}->{$_}++
     }
     return undef;
+}
+
+sub clear_stopwords {
+    my $self = shift;
+    undef $self->{stopwords};
 }
 
 sub check_word {
@@ -354,6 +359,10 @@ Loads stopwords from C<$filename_or_fh> and adds them to the on-memory dictionar
 =item $spellunker->add_stopwords(@stopwords)
 
 Add some C<< @stopwords >> to the on memory dictionary.
+
+=item $spellunker->clear_stopwords();
+
+Crear the information of stop words.
 
 =item $spellunker->check_word($word);
 
